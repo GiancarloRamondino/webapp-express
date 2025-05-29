@@ -5,7 +5,7 @@ const connection = mysql2.createConnection({
     user: 'root',
     port: 3306,
     password: 'your', // Sostituisci con la tua password
-    database: 'db_blog'
+    database: 'db_movie' // Sostituisci con il nome del tuo database
 });
 connection.connect((err) => {
     if (err) {
