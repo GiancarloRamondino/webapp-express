@@ -17,16 +17,44 @@ function show(req, res) {
     if (isNaN(movieId) || movieId <= 0) {
         return res.status(400).json({ error: 'ID non valido' });
     }
-    connection.query('SELECT * FROM movies WHERE id = ?', [movieId], (err, results) => {
+    // Query per recuperare il film con l'ID specificato
+    const sqlmovie = 'SELECT * FROM movies WHERE id = ?';
+    // Query per recuperare le recensioni del film
+    const sqlreviews = 'SELECT * FROM reviews WHERE movie_id = ?';
+    //media reviews
+    const sqlmedia = 'SELECT AVG(vote) as average_rating FROM reviews WHERE movie_id = ?';
+    // Recupera il film con l'ID specificato
+    connection.query(sqlmovie, [movieId], (err, results) => {
         if (err) {
             return res.status(500).json({ error: 'Errore nel recupero del film', details: err.message });
         }
         if (results.length === 0) {
             return res.status(404).json({ error: 'Film non trovato' });
         }
-        res.status(200).json(results[0]);
+        const movie = results[0];
+        // Recupera le recensioni del film
+        connection.query(sqlreviews, [movieId], (err, reviews) => {
+            if (err) {
+                return res.status(500).json({ error: 'Errore nel recupero delle recensioni', details: err.message });
+            }
+            movie.reviews = reviews || [];
+            // Recupera la media delle recensioni
+            connection.query(sqlmedia, [movieId], (err, mediaResults) => {
+                if (err) {
+                    return res.status(500).json({ error: 'Errore nel calcolo della media delle recensioni', details: err.message });
+                }
+                if (mediaResults.length > 0) {
+                    movie.average_rating = mediaResults[0].average_rating || 0;
+                } else {
+                    movie.average_rating = 0;
+                }
+                res.status(200).json(movie);
+            });
+        }
+        );
     });
 }
+
 //post
 function createMovie(req, res) {
     const { title, director, year } = req.body;
