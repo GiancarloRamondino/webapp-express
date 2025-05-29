@@ -1,6 +1,6 @@
 const connection = require('../data/db.js');
-//get
-function getAllMovies(req, res) {
+//index
+function index(req, res) {
     connection.query('SELECT * FROM movies', (err, results) => {
         if (err) {
             return res.status(500).json({ error: 'Errore nel recupero dei film', details: err.message });
@@ -9,7 +9,7 @@ function getAllMovies(req, res) {
     });
 }
 //get id
-function getMovieById(req, res) {
+function show(req, res) {
     if (!req.params.id) {
         return res.status(400).json({ error: 'ID mancante' });
     }
@@ -66,7 +66,7 @@ function updateMovie(req, res) {
     );
 }
 //destroy
-function deleteMovie(req, res) {
+function destroy(req, res) {
     const movieId = req.params.id;
     connection.query('DELETE FROM movies WHERE id = ?', [movieId], (err, result) => {
         if (err) {
@@ -80,9 +80,9 @@ function deleteMovie(req, res) {
 }
 
 module.exports = {
-    getAllMovies,
-    getMovieById,
+    index,
+    show,
     createMovie,
     updateMovie,
-    deleteMovie
+    destroy
 };
