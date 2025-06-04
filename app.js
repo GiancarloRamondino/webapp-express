@@ -23,6 +23,9 @@ const notFound = require('./middlewares/notFound.js');
 //importo il middleware per la gestione del tempo
 const checkTime = require('./middlewares/checkTime.js');
 
+// Importo il middleware per la gestione delle immagini
+const imagePath = require('./middlewares/imagePath.js');
+
 // Importo il router
 const router = require('./router/router.js');
 
@@ -46,6 +49,8 @@ app.get('/', (req, res) => {
 // Middleware to handle 404 and other errors
 app.use(notFound); // Handle 404 errors
 app.use(errorsHandler); // Handle other errors
+// Middleware to serve images from the 'public/images' directory
+app.use(imagePath); // Serve images from the 'public/images' directory
 
 // Start the server
 app.listen(port, () => {

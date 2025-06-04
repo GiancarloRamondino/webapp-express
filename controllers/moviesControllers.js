@@ -73,6 +73,7 @@ function createMovie(req, res) {
         }
     );
 }
+
 //put
 function updateMovie(req, res) {
     const movieId = req.params.id;
