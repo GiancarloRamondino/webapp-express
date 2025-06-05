@@ -57,19 +57,22 @@ function show(req, res) {
 }
 
 //post
-function createMovie(req, res) {
-    const { title, director, year } = req.body;
-    if (!title || !director || !year) {
-        return res.status(400).json({ error: 'Tutti i campi (title, director, year) sono obbligatori' });
+function store(req, res) {
+    const { title, director, release_year, genre, abstract } = req.body;
+    // Multer salva il file in req.file
+    const image = req.file ? req.file.filename : null;
+    if (!title || !director || !release_year || !genre || !abstract || !image) {
+        return res.status(400).json({ error: 'Tutti i campi (title, director, release_year, genre, abstract, image) sono obbligatori' });
     }
-    connection.query(
-        'INSERT INTO movies (title, director, year) VALUES (?, ?, ?)',
-        [title, director, year],
+    const sqlnewmovie = 'INSERT INTO movies (title, director, release_year, genre, abstract, image) VALUES (?, ?, ?, ?, ?, ?)';
+    
+    connection.query(sqlnewmovie,
+        [title, director, release_year, genre, abstract, image],
         (err, result) => {
             if (err) {
                 return res.status(500).json({ error: 'Errore nella creazione del film', details: err.message });
             }
-            res.status(201).json({ id: result.insertId, title, director, year });
+            res.status(201).json({ id: result.insertId, title, director, release_year, genre, abstract, image });
         }
     );
 }
@@ -77,13 +80,17 @@ function createMovie(req, res) {
 //put
 function updateMovie(req, res) {
     const movieId = req.params.id;
-    const { title, director, year } = req.body;
-    if (!title || !director || !year) {
-        return res.status(400).json({ error: 'Tutti i campi (title, director, year) sono obbligatori' });
+    const { title, director, release_year, genre, abstract } = req.body;
+    const image = req.file ? req.file.filename : req.body.image; // aggiorna solo se arriva un nuovo file
+
+    if (!title || !director || !release_year || !genre || !abstract) {
+        return res.status(400).json({ error: 'Tutti i campi (title, director, release_year, genre, abstract) sono obbligatori' });
     }
+
+    const sql = 'UPDATE movies SET title = ?, director = ?, release_year = ?, genre = ?, abstract = ?, image = ? WHERE id = ?';
     connection.query(
-        'UPDATE movies SET title = ?, director = ?, year = ? WHERE id = ?',
-        [title, director, year, movieId],
+        sql,
+        [title, director, release_year, genre, abstract, image, movieId],
         (err, result) => {
             if (err) {
                 return res.status(500).json({ error: 'Errore nell\'aggiornamento del film', details: err.message });
@@ -91,7 +98,7 @@ function updateMovie(req, res) {
             if (result.affectedRows === 0) {
                 return res.status(404).json({ error: 'Film non trovato' });
             }
-            res.status(200).json({ id: movieId, title, director, year });
+            res.status(200).json({ id: movieId, title, director, release_year, genre, abstract, image });
         }
     );
 }
@@ -112,7 +119,7 @@ function destroy(req, res) {
 module.exports = {
     index,
     show,
-    createMovie,
+    store,
     updateMovie,
     destroy
 };
