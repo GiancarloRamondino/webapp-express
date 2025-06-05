@@ -61,15 +61,16 @@ function store(req, res) {
     const { title, director, release_year, genre, abstract } = req.body;
     // Multer salva il file in req.file
     const image = req.file ? req.file.filename : null;
-    if (!title || !director || !release_year || !genre || !abstract || !image) {
+    if (!title || !director || !release_year || !genre || !abstract ) {
         return res.status(400).json({ error: 'Tutti i campi (title, director, release_year, genre, abstract, image) sono obbligatori' });
     }
     const sqlnewmovie = 'INSERT INTO movies (title, director, release_year, genre, abstract, image) VALUES (?, ?, ?, ?, ?, ?)';
-    
+
     connection.query(sqlnewmovie,
         [title, director, release_year, genre, abstract, image],
         (err, result) => {
             if (err) {
+                console.log(err);
                 return res.status(500).json({ error: 'Errore nella creazione del film', details: err.message });
             }
             res.status(201).json({ id: result.insertId, title, director, release_year, genre, abstract, image });
