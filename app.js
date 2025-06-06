@@ -34,6 +34,7 @@ app.use(checkTime); // usa il middleware per controllare l'orario di accesso
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 //asset static files from the 'public' directory
 app.use(express.static('public'));

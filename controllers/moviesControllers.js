@@ -117,10 +117,42 @@ function destroy(req, res) {
     });
 }
 
+//storeReview
+const storeReview = (req, res) => {
+    const { id } = req.params;
+    // Controllo che req.body sia definito
+    if (!req.body || typeof req.body !== 'object') {
+        return res.status(400).json({ error: 'Dati della recensione mancanti o non validi' });
+    }
+    const { vote, text, name } = req.body;
+
+    // Controllo che tutti i campi siano presenti e validi
+    if (
+        vote === undefined ||
+        text === undefined ||
+        name === undefined ||
+        text === '' ||
+        name === '' ||
+        isNaN(Number(vote))
+    ) {
+        return res.status(400).json({ error: 'Tutti i campi (name, vote, text, movie_id) sono obbligatori e validi' });
+    }
+
+    const sql = 'INSERT INTO reviews (name, vote, text, movie_id) VALUES (?, ?, ?, ?)';
+    connection.query(sql, [name, vote, text, id], (err, result) => {
+        if (err) {
+            return res.status(500).json({ error: 'Errore nella creazione della recensione', details: err.message });
+        }
+        res.status(201).json({ id: result.insertId, name, vote, text, movie_id: id });
+    });
+};
+
 module.exports = {
     index,
     show,
     store,
     updateMovie,
-    destroy
+    destroy,
+    //storeReview
+    storeReview
 };
