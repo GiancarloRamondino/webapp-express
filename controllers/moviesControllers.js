@@ -119,31 +119,23 @@ function destroy(req, res) {
 
 //storeReview
 const storeReview = (req, res) => {
-    const { id } = req.params;
-    // Controllo che req.body sia definito
-    if (!req.body || typeof req.body !== 'object') {
-        return res.status(400).json({ error: 'Dati della recensione mancanti o non validi' });
-    }
-    const { vote, text, name } = req.body;
+    const { id } = req.params; // id del film dalla route
+    const { name, text, vote } = req.body;
 
-    // Controllo che tutti i campi siano presenti e validi
-    if (
-        vote === undefined ||
-        text === undefined ||
-        name === undefined ||
-        text === '' ||
-        name === '' ||
-        isNaN(Number(vote))
-    ) {
-        return res.status(400).json({ error: 'Tutti i campi (name, vote, text, movie_id) sono obbligatori e validi' });
+    // Validate vote is a number
+    const parsedVote = parseInt(vote, 10);
+    if (isNaN(parsedVote)) {
+        return res.status(400).json({ error: 'Il campo vote deve essere un numero intero valido' });
     }
 
-    const sql = 'INSERT INTO reviews (name, vote, text, movie_id) VALUES (?, ?, ?, ?)';
-    connection.query(sql, [name, vote, text, id], (err, result) => {
+    // movie_id viene associato all'id del film dalla route (params.id)
+    const sql = 'INSERT INTO reviews (name, text, vote, movie_id) VALUES (?, ?, ?, ?)';
+
+    connection.query(sql, [name, text, parsedVote, id], (err, result) => {
         if (err) {
             return res.status(500).json({ error: 'Errore nella creazione della recensione', details: err.message });
         }
-        res.status(201).json({ id: result.insertId, name, vote, text, movie_id: id });
+        res.status(201).json({ id: result.insertId, name, text, vote: parsedVote, movie_id: id });
     });
 };
 
